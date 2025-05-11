@@ -87,8 +87,7 @@ def chunk_text(text: str, max_tokens: int = 8000) -> list:
     return chunks
 
 
-# --- OpenAI Embeddings Client (Adapted from upload_old_newsletters.py) ---
-# Initialize client within the function context or globally if thread-safe
+# --- OpenAI Embeddings Client 
 embeddings_client = None
 if OPENAI_API_KEY:
     try:
@@ -98,8 +97,8 @@ if OPENAI_API_KEY:
             print(sth.data[0].embedding)
             """
 
-            def set_embeddings_client(self):
-                return OpenAI()
+            #def set_embeddings_client(self):
+            #    return OpenAI()
 
             def get_openai_embedding(self, text):
                 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
