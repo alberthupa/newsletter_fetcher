@@ -665,7 +665,7 @@ if __name__ == "__main__":
 
         logging.info(f"Ingestion date range: {start_date} to {end_date}")
 
-        '''
+
 
         # Iterate through the date range and process newsletters for each day
         current_date = start_date
@@ -687,4 +687,3 @@ if __name__ == "__main__":
             "Python timer trigger function finished at %s",
             datetime.utcnow().replace(tzinfo=None).isoformat(),
         )
-        ''' 
