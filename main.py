@@ -10,43 +10,7 @@ import tiktoken
 
 from azure.cosmos import CosmosClient, exceptions
 
-"""
-ave created the Python code for the Azure Function to download the latest newsletters from Gmail and upload them to Azure Cosmos DB. The code has been saved to get_newsletters_on_function.py.
 
-This code includes the logic to:
-
-Initialize the necessary clients for Gmail, Cosmos DB, and OpenAI Embeddings.
-Query Cosmos DB to find the date of the last ingested newsletter.
-Calculate the date range for ingestion (starting from the day after the last ingested date, or 7 days ago if no previous data is found, up to the current day).
-Iterate through the date range, fetch emails from Gmail, process their content, generate embeddings, and upload the data to Cosmos DB.
-To deploy this as an Azure Function, you will need to:
-
-Create a new Azure Function App with a Python runtime.
-Configure a Timer Trigger for the function (e.g., to run daily).
-Set the required environment variables in the Function App settings:
-COSMOS_CONNECTION_STRING
-DATABASE_NAME (currently set to "hupi-loch" in the code, update if needed)
-CONTAINER_NAME (currently set to "knowledge-chunks" in the code, update if needed)
-GMAIL_REFRESH_TOKEN
-GMAIL_CLIENT_ID
-GMAIL_CLIENT_SECRET
-OPENAI_API_KEY (if using OpenAI Embeddings)
-Ensure that the necessary Python libraries (like azure-functions, azure-cosmos, google-api-python-client, google-auth-oauthlib, html2text, tiktoken, and potentially openai or the specific library for OpenAIEmbeddings) are included in a requirements.txt file in your function's directory for deployment.
-Deploy the function code to your Azure Function App.
-"""
-
-
-# Assuming these are available or will be adapted
-# from src.vectors.embeddings_clients import OpenAIEmbeddings
-# from google.oauth2.credentials import Credentials
-# from google.auth.transport.requests import Request
-# from googleapiclient.discovery import build
-# import html2text
-# from email.utils import parsedate_to_datetime
-
-# Placeholder imports - will need to ensure these modules/classes are accessible
-# in the Azure Function environment or include their code directly.
-# For now, assuming they are available or will be handled by deployment.
 try:
     from src.vectors.embeddings_clients import OpenAIEmbeddings
     from google.oauth2.credentials import Credentials
