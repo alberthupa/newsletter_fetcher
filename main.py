@@ -11,10 +11,10 @@ except ImportError:
 import time
 import tiktoken
 from openai import OpenAI
-from azure.cosmos import CosmosClient, exceptions
+from azure.cosmos import CosmosClient, exceptionsOPENAI_API_KEY
 
-# from dotenv import load_dotenv
-# load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 
 
 try:
@@ -101,7 +101,7 @@ if OPENAI_API_KEY:
             #    return OpenAI()
 
             def get_openai_embedding(self, text):
-                client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+                client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
                 return client.embeddings.create(input=text, model="text-embedding-3-small")
             
         embeddings_client = OpenAIEmbeddings()
