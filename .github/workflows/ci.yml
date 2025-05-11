@@ -47,7 +47,7 @@ jobs:
           echo "OPENAI_API_KEY is not set!"
           exit 1
         else
-          echo "OPENAI_API_KEY is set."
+          echo "OPENAI_API_KEY is set." sssss
         fi
         if [ -z "$COSMOS_CONNECTION_STRING" ]; then
           echo "COSMOS_CONNECTION_STRING is not set!"
