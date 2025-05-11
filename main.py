@@ -37,14 +37,11 @@ except ImportError as e:
 
 # --- Environment Variables & Constants ---
 # These should be set in Azure Function App settings
-COSMOS_CONNECTION_STRING = os.environ["COSMOS_CONNECTION_STRING"]
+
 DATABASE_NAME = "hupi-loch"  # Replace with your database name if different
 CONTAINER_NAME = "knowledge-chunks"  # Replace with your container name
 
-GMAIL_REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
-GMAIL_CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
-GMAIL_CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+
 
 
 # --- Token handling functions (Copied from upload_old_newsletters.py) ---
@@ -99,7 +96,7 @@ if OPENAI_API_KEY:
             #    return OpenAI()
 
             def get_openai_embedding(self, text):
-                client = OpenAI(api_key=OPENAI_API_KEY)
+                client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
                 return client.embeddings.create(input=text, model="text-embedding-3-small")
             
         embeddings_client = OpenAIEmbeddings()
@@ -250,7 +247,7 @@ def upload_text_chunk(
 def get_gmail_service():
     """Initializes and returns the Gmail API service."""
     logging.info("Debug: Initializing Gmail service...")
-    if not all([GMAIL_REFRESH_TOKEN, GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET]):
+    if not all([os.environ["GMAIL_REFRESH_TOKEN"], os.environ["GMAIL_CLIENT_ID"], os.environ["GMAIL_CLIENT_SECRET"]]):
         logging.error(
             "Error: Gmail API credentials (refresh token, client ID, client secret) not fully set."
         )
@@ -261,10 +258,10 @@ def get_gmail_service():
     try:
         gmail_creds = Credentials(
             token=None,
-            refresh_token=GMAIL_REFRESH_TOKEN,
+            refresh_token=os.environ["GMAIL_REFRESH_TOKEN"],
             token_uri="https://oauth2.googleapis.com/token",
-            client_id=GMAIL_CLIENT_ID,
-            client_secret=GMAIL_CLIENT_SECRET,
+            client_id=os.environ["GMAIL_CLIENT_ID"],
+            client_secret=os.environ["GMAIL_CLIENT_SECRET"],
             scopes=["https://www.googleapis.com/auth/gmail.readonly"],
         )
         gmail_creds.refresh(Request())
@@ -623,7 +620,7 @@ if __name__ == "__main__":
     logging.info("Python timer trigger function started at %s", utc_timestamp)
 
     # Initialize clients
-    cosmos_client_instance = get_cosmos_client(COSMOS_CONNECTION_STRING)
+    cosmos_client_instance = get_cosmos_client(os.environ["COSMOS_CONNECTION_STRING"])
     container_client_instance = None
     if cosmos_client_instance:
         container_client_instance = get_container_client(
