@@ -37,16 +37,14 @@ except ImportError as e:
 
 # --- Environment Variables & Constants ---
 # These should be set in Azure Function App settings
-COSMOS_CONNECTION_STRING = os.environ.get("COSMOS_CONNECTION_STRING")
+COSMOS_CONNECTION_STRING = os.environ["COSMOS_CONNECTION_STRING"]
 DATABASE_NAME = "hupi-loch"  # Replace with your database name if different
 CONTAINER_NAME = "knowledge-chunks"  # Replace with your container name
 
-GMAIL_REFRESH_TOKEN = os.environ.get("GMAIL_REFRESH_TOKEN")
-GMAIL_CLIENT_ID = os.environ.get("GMAIL_CLIENT_ID")
-GMAIL_CLIENT_SECRET = os.environ.get("GMAIL_CLIENT_SECRET")
-OPENAI_API_KEY = os.environ.get(
-    "OPENAI_API_KEY"
-)  # Assuming OpenAI key is needed for embeddings
+GMAIL_REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
+GMAIL_CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
+GMAIL_CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
 
 # --- Token handling functions (Copied from upload_old_newsletters.py) ---
@@ -101,7 +99,7 @@ if OPENAI_API_KEY:
             #    return OpenAI()
 
             def get_openai_embedding(self, text):
-                client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+                client = OpenAI(api_key=OPENAI_API_KEY)
                 return client.embeddings.create(input=text, model="text-embedding-3-small")
             
         embeddings_client = OpenAIEmbeddings()
