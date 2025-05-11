@@ -1,0 +1,64 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run every day at 6:00 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:  # Add this line to enable manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x' # Use the latest Python 3 version
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run a simple check
+      env:
+        # Example of how to pass secrets as environment variables
+        # You need to add these secrets in your GitHub repository settings
+        COSMOS_CONNECTION_STRING: ${{ secrets.COSMOS_CONNECTION_STRING }}
+        DATABASE_NAME: ${{ secrets.DATABASE_NAME }} # Or hardcode if not sensitive
+        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }} # Or hardcode if not sensitive
+        GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+        GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+        GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        echo "Dependencies installed successfully."
+        python --version
+        pip list
+        # Add more checks here, e.g., linting, static analysis, or tests
+        # You can now access the secrets as environment variables, e.g., os.environ.get("OPENAI_API_KEY")
+        # Be careful not to print sensitive information in logs!
+        echo "Environment variables configured (secrets are masked in logs)."
+        # Example: Check if a required environment variable is set (without printing its value)
+        if [ -z "$OPENAI_API_KEY" ]; then
+          echo "OPENAI_API_KEY is not set!"
+          exit 1
+        else
+          echo "OPENAI_API_KEY is set."
+        fi
+        # For example:
+        # pip install flake8
+        # flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+
+        - name: Run newsletter fetcher
+        run: python main.py
+      

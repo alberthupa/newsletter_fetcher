@@ -1,4 +1,4 @@
-    import logging
+import logging
 import os
 import json
 import re
@@ -6,13 +6,14 @@ import base64
 from datetime import datetime, timedelta, date as py_date
 import time
 import tiktoken
-
-
+from openai import OpenAI
 from azure.cosmos import CosmosClient, exceptions
+
+# from dotenv import load_dotenv
+# load_dotenv()
 
 
 try:
-    from src.vectors.embeddings_clients import OpenAIEmbeddings
     from google.oauth2.credentials import Credentials
     from google.auth.transport.requests import Request
     from googleapiclient.discovery import build
@@ -85,9 +86,23 @@ def chunk_text(text: str, max_tokens: int = 8000) -> list:
 # --- OpenAI Embeddings Client (Adapted from upload_old_newsletters.py) ---
 # Initialize client within the function context or globally if thread-safe
 embeddings_client = None
-if OpenAIEmbeddings and OPENAI_API_KEY:
+if OPENAI_API_KEY:
     try:
+        class OpenAIEmbeddings:
+            """
+            sth = OpenAIEmbeddings().get_openai_embedding("test")
+            print(sth.data[0].embedding)
+            """
+
+            def set_embeddings_client(self):
+                return OpenAI()
+
+            def get_openai_embedding(self, text):
+                client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+                return client.embeddings.create(input=text, model="text-embedding-3-small")
+            
         embeddings_client = OpenAIEmbeddings()
+
         logging.info("OpenAIEmbeddings client initialized.")
     except Exception as e:
         logging.error(f"Error initializing OpenAIEmbeddings client: {e}")
@@ -649,6 +664,8 @@ if __name__ == "__main__":
 
         logging.info(f"Ingestion date range: {start_date} to {end_date}")
 
+        '''
+
         # Iterate through the date range and process newsletters for each day
         current_date = start_date
         while current_date <= end_date:
@@ -669,3 +686,4 @@ if __name__ == "__main__":
             "Python timer trigger function finished at %s",
             datetime.utcnow().replace(tzinfo=None).isoformat(),
         )
+        ''' 
