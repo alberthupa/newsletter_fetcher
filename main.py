@@ -4,6 +4,10 @@ import json
 import re
 import base64
 from datetime import datetime, timedelta, date as py_date
+try:
+    from datetime import timezone
+except ImportError:
+    timezone = None
 import time
 import tiktoken
 from openai import OpenAI
@@ -612,7 +616,10 @@ def get_last_newsletter_date(container_client):
 
 if __name__ == "__main__":
     print("--- Starting Newsletter Ingestion Script (Historical Processing) ---")
-    utc_timestamp = datetime.now(datetime.timezone.utc).isoformat()
+    if 'timezone' in globals() and timezone is not None:
+        utc_timestamp = datetime.now(timezone.utc).isoformat()
+    else:
+        utc_timestamp = datetime.utcnow().isoformat() + "Z"
 
 
 
