@@ -84,7 +84,7 @@ def chunk_text(text: str, max_tokens: int = 8000) -> list:
 
 # --- OpenAI Embeddings Client 
 embeddings_client = None
-if OPENAI_API_KEY:
+if os.environ["OPENAI_API_KEY"]:
     try:
         class OpenAIEmbeddings:
             """
