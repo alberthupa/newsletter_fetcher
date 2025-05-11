@@ -612,7 +612,7 @@ def get_last_newsletter_date(container_client):
 
 if __name__ == "__main__":
     print("--- Starting Newsletter Ingestion Script (Historical Processing) ---")
-    utc_timestamp = datetime.utcnow().replace(tzinfo=None).isoformat()
+    utc_timestamp = datetime.now(datetime.UTC).isoformat()
 
 
 

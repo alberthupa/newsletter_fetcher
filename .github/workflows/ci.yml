@@ -43,9 +43,6 @@ jobs:
         echo "Dependencies installed successfully."
         python --version
         pip list
-        # Add more checks here, e.g., linting, static analysis, or tests
-        # You can now access the secrets as environment variables, e.g., os.environ.get("OPENAI_API_KEY")
-        # Be careful not to print sensitive information in logs!
         echo "Environment variables configured (secrets are masked in logs)."
         # Example: Check if a required environment variable is set (without printing its value)
         if [ -z "$OPENAI_API_KEY" ]; then
@@ -54,10 +51,7 @@ jobs:
         else
           echo "OPENAI_API_KEY is set."
         fi
-        # For example:
-        # pip install flake8
-        # flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+
 
     - name: Run newsletter fetcher
       run: python main.py
