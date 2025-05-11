@@ -11,7 +11,7 @@ except ImportError:
 import time
 import tiktoken
 from openai import OpenAI
-from azure.cosmos import CosmosClient, exceptionsOPENAI_API_KEY
+from azure.cosmos import CosmosClient, exceptions
 
 #from dotenv import load_dotenv
 #load_dotenv()
