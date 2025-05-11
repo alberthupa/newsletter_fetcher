@@ -49,7 +49,12 @@ jobs:
         else
           echo "OPENAI_API_KEY is set."
         fi
-
+        if [ -z "$COSMOS_CONNECTION_STRING" ]; then
+          echo "COSMOS_CONNECTION_STRING is not set!"
+          exit 1
+        else
+          echo "COSMOS_CONNECTION_STRING is set."
+        fi
 
     - name: Run newsletter fetcher
       env:
