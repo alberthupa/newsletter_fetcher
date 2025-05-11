@@ -30,8 +30,6 @@ jobs:
 
     - name: Run a simple check
       env:
-        # Example of how to pass secrets as environment variables
-        # You need to add these secrets in your GitHub repository settings
         COSMOS_CONNECTION_STRING: ${{ secrets.COSMOS_CONNECTION_STRING }}
         DATABASE_NAME: ${{ secrets.DATABASE_NAME }} # Or hardcode if not sensitive
         CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }} # Or hardcode if not sensitive
@@ -54,5 +52,13 @@ jobs:
 
 
     - name: Run newsletter fetcher
+      env:
+        COSMOS_CONNECTION_STRING: ${{ secrets.COSMOS_CONNECTION_STRING }}
+        DATABASE_NAME: ${{ secrets.DATABASE_NAME }} # Or hardcode if not sensitive
+        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }} # Or hardcode if not sensitive
+        GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+        GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+        GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}    
       run: python main.py
       
