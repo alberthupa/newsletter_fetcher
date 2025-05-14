@@ -15,6 +15,7 @@ from azure.cosmos import CosmosClient, exceptions
 
 #from dotenv import load_dotenv
 #load_dotenv()
+# todo: https://chatgpt.com/c/682439e6-c8c0-800a-bded-44dcd3451deb
 
 
 try:
