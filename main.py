@@ -53,7 +53,89 @@ def count_tokens(text: str) -> int:
     return len(tokens)
 
 
-def chunk_text(text: str, max_tokens: int = 8000) -> list:
+def chunk_text(text: str, max_tokens: int = 1000, overlap_tokens: int = 100) -> list[str]:
+    """
+    Chunks a given text into smaller segments with a specified maximum number of tokens
+    and a specified number of overlapping tokens between consecutive chunks.
+
+    Args:
+        text: The input string to be chunked.
+        max_tokens: The maximum number of tokens allowed in a chunk.
+                    Each chunk will contain up to this many tokens.
+        overlap_tokens: The number of tokens to overlap between consecutive chunks.
+                        The end of one chunk will share 'overlap_tokens' with the
+                        beginning of the next chunk.
+
+    Returns:
+        A list of text chunks.
+
+    Raises:
+        TypeError: If 'text' is not a string, or 'max_tokens'/'overlap_tokens' are not integers.
+        ValueError: If max_tokens is not positive, overlap_tokens is negative,
+                    or overlap_tokens is greater than or equal to max_tokens (which
+                    would prevent the chunking window from advancing).
+    """
+    # Validate input types
+    if not isinstance(text, str):
+        raise TypeError("Input 'text' must be a string.")
+    if not isinstance(max_tokens, int):
+        raise TypeError("Input 'max_tokens' must be an integer.")
+    if not isinstance(overlap_tokens, int):
+        raise TypeError("Input 'overlap_tokens' must be an integer.")
+
+    # Validate input values
+    if max_tokens <= 0:
+        raise ValueError("max_tokens must be a positive integer.")
+    if overlap_tokens < 0:
+        raise ValueError("overlap_tokens must be a non-negative integer.")
+    if overlap_tokens >= max_tokens:
+        raise ValueError(
+            "overlap_tokens must be less than max_tokens to ensure chunk progression."
+        )
+
+
+    try:
+        encoding = tiktoken.get_encoding("cl100k_base")
+    except Exception as e:
+        print(f"Error initializing tiktoken encoder: {e}")
+        raise  
+
+    # Encode the entire text into tokens
+    tokens = encoding.encode(text)
+
+    if len(tokens) <= max_tokens:
+        return [text]
+
+    chunks = []
+
+    # Calculate the step size for the sliding window.
+    # This is how much the start of the window moves for each subsequent chunk.
+    # It's max_tokens minus overlap_tokens to ensure the desired overlap.
+    step_size = max_tokens - overlap_tokens
+
+    current_pos = 0
+    while current_pos < len(tokens):
+        # Determine the end position of the current chunk's window
+        end_pos = min(current_pos + max_tokens, len(tokens))
+
+        # Get the token IDs for the current chunk
+        chunk_token_ids = tokens[current_pos:end_pos]
+
+        # Decode the token IDs back to a text string
+        chunk_text_content = encoding.decode(chunk_token_ids)
+        chunks.append(chunk_text_content)
+        # print(chunk_text_content)
+
+        # If this chunk's window reaches the end of the token list, we're done
+        if end_pos == len(tokens):
+            break
+
+        # Move the starting position for the next chunk
+        current_pos += step_size
+        
+    return chunks
+
+def chunk_text_old(text: str, max_tokens: int = 8000) -> list:
     """
     Split text into chunks that don't exceed the maximum token limit.
     (Copied from upload_old_newsletters.py)
@@ -483,7 +565,7 @@ def process_newsletters_for_date(
         logging.info(f"Debug: Text has {token_count} tokens")
 
         text_chunks_list = (
-            chunk_text(text_to_embed) if token_count > 8000 else [text_to_embed]
+            chunk_text(text_to_embed) if token_count > 1000 else [text_to_embed]
         )
         logging.info(f"Debug: Text split into {len(text_chunks_list)} chunks")
 
