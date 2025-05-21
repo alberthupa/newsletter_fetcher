@@ -25,6 +25,7 @@ class SimpleCosmosClient:
         Connects to the Cosmos DB account and gets the database client.
         """
         print("Connecting to Cosmos DB...")
+        print(self.database_name)
         try:
             parts = self.connection_string.split(";")
             uri = None
@@ -40,7 +41,7 @@ class SimpleCosmosClient:
                 raise ValueError("Invalid connection string format")
 
             self.cosmos_client = CosmosClient(uri, key)
-            print("CosmosClient initialized successfully.")
+            print("CosmosClient initialized successfully...")
 
             self.database_client = self.cosmos_client.get_database_client(
                 self.database_name

@@ -5,12 +5,13 @@ from pydantic import BaseModel, Field, ValidationError, RootModel
 from typing import Dict, List
 from basic_agent import BasicAgent
 from cosmos_client import SimpleCosmosClient
+from dotenv import load_dotenv
 
-
+load_dotenv(override=True)
 
 
 COSMOS_CONNECTION_STRING = os.environ.get("COSMOS_CONNECTION_STRING")
-COSMOS_DATABASE_NAME = os.environ.get("COSMOS_DB_NAME") 
+COSMOS_DATABASE_NAME = os.environ.get("COSMOS_DATABASE_NAME") 
 PARTITION_KEY_PATH = "/id"
 
 
@@ -42,7 +43,8 @@ def query_llm(
     p = prompt
     for _ in range(max_tries):
         print(f"attempt {_ + 1} of {max_tries}")
-        txt = agent.get_text_response_from_llm(model, messages=p, code_tag=None)[
+        # txt = agent.get_text_response_from_llm(model, messages=p, code_tag=None)[
+        txt = agent._get_text_response_from_llm('priv_openai:gpt-4.1', messages=p, code_tag=None)[
             "text_response"
         ]
         if "```" in txt:
@@ -127,6 +129,7 @@ def process_chunk(pieces_container_client, chunk_to_do):
 def main():
 
     # Initialize Cosmos Client
+
     try:
         cosmos_client = SimpleCosmosClient(
             connection_string=COSMOS_CONNECTION_STRING,
