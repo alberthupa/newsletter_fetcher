@@ -60,22 +60,7 @@ def query_llm(
     raise RuntimeError("Failed to obtain valid payload after 3 attempts.")
 
 
-message_template = """This is a content of last newslettters about AI: {text}. #####
-    Your task is to extract news and opinions about AI related topics from the text. Accompany it with keywords organized into topics:
-    {{
-        "... news headline ..." : {{
-            "news": "Gemini 2.0 has been released with new features.",
-            "keywords": ["", ""], # one of: "LLMs", "AI Agents", "AI Infrastructure", "AI Engineering & Tooling", "AI Applications", "Benchmarks", "Metrics", "AI Companies", "AI Researchers & Engineers", "AI Communities", "AI Events", "AI Governance", "AI Ethics", "AI Bias", "AI Impact on Work", "Copyright", "Datasets", "Model Weights", "Technical Reports", "Open Source Projects",
-            "companies": ["", ""], # e.g. "Google", "Anthropic", "OpenAI", "Meta", "Tencent", "DeepSeek", "Perplexity AI", "Cartesia", "PrimeIntellect", "Alibaba", "HuggingFace", "Unsloth AI", "Nous Research AI",
-            "model name": ["", ""], #  e.g. "Gemini 2.0", "Claude 3", "Claude Code", "Gemini 2.5 Pro", "Gemini 2.5 Turbo",
-            "model architecture": ["", ""], # e.g. "Transformer", "MoE", "Llama", "Claude", "Gemini", "DeepSeek", "Grok", "Sonar",
-            "detailed model version": ["", ""], # e.g. "Gemini 2.0", "Claude 3", "Claude Code", "Gemini 2.5 Pro", "Gemini 2.5 Turbo",
-            "ai tools: ["", ""], # e.g. "KerasRS", "LangChain", "LlamaIndex", "Aider", "Cursor", "Windsurf", "CUTLASS", "CuTe DSL", "Torchtune", "Mojo",
-            "infrastucture": ["", ""], # e.g. "NVIDIA", "Intel Arc", "TPUs", "VRAM", "KV Cache", "CUDA", "IPEX", "SYCL",
-            "ml techniques": ["", ""] # e.g. "XGBoost", "RL", "Supervised Learning", "Post-Training", "Quantization Techniques", "Inference Optimization
-        }}
-    }}   
-"""
+
 
 
 def make_piece_id(parent_id: str, headline: str) -> str:
@@ -101,6 +86,23 @@ def process_chunk(pieces_container_client, chunk_to_do):
         "chunk_date",
         "processing_target_date",
     ]
+
+    message_template = """This is a content of last newslettters about AI: {text}. #####
+        Your task is to extract news and opinions about AI related topics from the text. Accompany it with keywords organized into topics:
+        {{
+            "... news headline ..." : {{
+                "news": "Gemini 2.0 has been released with new features.",
+                "keywords": ["", ""], # one of: "LLMs", "AI Agents", "AI Infrastructure", "AI Engineering & Tooling", "AI Applications", "Benchmarks", "Metrics", "AI Companies", "AI Researchers & Engineers", "AI Communities", "AI Events", "AI Governance", "AI Ethics", "AI Bias", "AI Impact on Work", "Copyright", "Datasets", "Model Weights", "Technical Reports", "Open Source Projects",
+                "companies": ["", ""], # e.g. "Google", "Anthropic", "OpenAI", "Meta", "Tencent", "DeepSeek", "Perplexity AI", "Cartesia", "PrimeIntellect", "Alibaba", "HuggingFace", "Unsloth AI", "Nous Research AI",
+                "model name": ["", ""], #  e.g. "Gemini 2.0", "Claude 3", "Claude Code", "Gemini 2.5 Pro", "Gemini 2.5 Turbo",
+                "model architecture": ["", ""], # e.g. "Transformer", "MoE", "Llama", "Claude", "Gemini", "DeepSeek", "Grok", "Sonar",
+                "detailed model version": ["", ""], # e.g. "Gemini 2.0", "Claude 3", "Claude Code", "Gemini 2.5 Pro", "Gemini 2.5 Turbo",
+                "ai tools: ["", ""], # e.g. "KerasRS", "LangChain", "LlamaIndex", "Aider", "Cursor", "Windsurf", "CUTLASS", "CuTe DSL", "Torchtune", "Mojo",
+                "infrastucture": ["", ""], # e.g. "NVIDIA", "Intel Arc", "TPUs", "VRAM", "KV Cache", "CUDA", "IPEX", "SYCL",
+                "ml techniques": ["", ""] # e.g. "XGBoost", "RL", "Supervised Learning", "Post-Training", "Quantization Techniques", "Inference Optimization
+            }}
+        }}   
+    """
 
     try:
         print(f"Processing chunk: {chunk_to_do['id']}")
@@ -144,11 +146,10 @@ def main():
 
 
         
-    done_ids = pieces.query_items(
+    done_ids = list(pieces.query_items(
         query="SELECT VALUE p.parent_id FROM p",
         enable_cross_partition_query=True,
-    )
-    list_done_ids = list(done_ids)
+    ))
 
     query_to_get_a_note = """
         SELECT TOP 1000 *
@@ -157,12 +158,12 @@ def main():
         ORDER BY c.chunk_date  
     """
 
-    chunks_to_do = chunks.query_items(
+    chunks_to_do = list(chunks.query_items(
         query=query_to_get_a_note,
-        parameters=[{"name": "@done", "value": list(list_done_ids)}],
+        parameters=[{"name": "@done", "value": done_ids}],
         enable_cross_partition_query=True,
-    )
-    chunks_to_do = list(chunks_to_do)
+    ))
+    
     print(f"len chunks_to_do: {len(chunks_to_do)}")
 
     if len(chunks_to_do) > 0:
