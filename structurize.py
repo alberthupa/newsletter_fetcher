@@ -5,19 +5,18 @@ from pydantic import BaseModel, Field, ValidationError, RootModel
 from typing import Dict, List
 from basic_agent import BasicAgent
 from cosmos_client import SimpleCosmosClient
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv(override=True)
+# load_dotenv(override=True)
 
 
 COSMOS_CONNECTION_STRING = os.environ.get("COSMOS_CONNECTION_STRING")
-COSMOS_DATABASE_NAME = os.environ.get("COSMOS_DATABASE_NAME") 
+COSMOS_DATABASE_NAME = os.environ.get("COSMOS_DATABASE_NAME")
 PARTITION_KEY_PATH = "/id"
 
 
-
-
 StrList = List[str]
+
 
 class Summary(BaseModel):
     news: str
@@ -29,6 +28,7 @@ class Summary(BaseModel):
     ai_tools: StrList = Field(alias="ai tools")
     infrastructure: StrList = Field(alias="infrastucture")
     ml_techniques: StrList = Field(alias="ml techniques")
+
 
 class Payload(RootModel):
     root: Dict[str, Summary]  # e.g. {"news summary 1": Summary, …}
@@ -44,9 +44,9 @@ def query_llm(
     for _ in range(max_tries):
         print(f"attempt {_ + 1} of {max_tries}")
         # txt = agent.get_text_response_from_llm(model, messages=p, code_tag=None)[
-        txt = agent._get_text_response_from_llm('priv_openai:gpt-4.1', messages=p, code_tag=None)[
-            "text_response"
-        ]
+        txt = agent._get_text_response_from_llm(
+            "priv_openai:gpt-4.1", messages=p, code_tag=None
+        )["text_response"]
         if "```" in txt:
             parts = txt.split("```")
             if len(parts) >= 3:
@@ -62,13 +62,9 @@ def query_llm(
     raise RuntimeError("Failed to obtain valid payload after 3 attempts.")
 
 
-
-
-
 def make_piece_id(parent_id: str, headline: str) -> str:
     digest = hashlib.sha1(headline.encode("utf-8")).hexdigest()[:12]
     return f"{parent_id}_{digest}"
-
 
 
 def process_chunk(pieces_container_client, chunk_to_do):
@@ -124,10 +120,9 @@ def process_chunk(pieces_container_client, chunk_to_do):
     except Exception as e:
         print(f"Error processing chunk {chunk_to_do['id']}: {e}")
         return False
-    
+
 
 def main():
-
     # Initialize Cosmos Client
 
     try:
@@ -138,21 +133,17 @@ def main():
         )
 
         cosmos_client.connect()
-
-        # Get clients for the 'pieces' and 'chunks' containers
         pieces = cosmos_client.database_client.get_container_client("knowledge-pieces")
         chunks = cosmos_client.database_client.get_container_client("knowledge-chunks")
-        #logger.info("Successfully connected to Cosmos DB and retrieved container clients.")
     except Exception as e:
-        #logger.error(f"Failed to initialize Cosmos DB client or containers: {e}", exc_info=True)
-        raise # Critical failure, cannot proceed without DB access
+        raise  # Critical failure, cannot proceed without DB access
 
-
-        
-    done_ids = list(pieces.query_items(
-        query="SELECT VALUE p.parent_id FROM p",
-        enable_cross_partition_query=True,
-    ))
+    done_ids = list(
+        pieces.query_items(
+            query="SELECT VALUE p.parent_id FROM p",
+            enable_cross_partition_query=True,
+        )
+    )
 
     query_to_get_a_note = """
         SELECT TOP 1000 *
@@ -161,12 +152,14 @@ def main():
         ORDER BY c.chunk_date  
     """
 
-    chunks_to_do = list(chunks.query_items(
-        query=query_to_get_a_note,
-        parameters=[{"name": "@done", "value": done_ids}],
-        enable_cross_partition_query=True,
-    ))
-    
+    chunks_to_do = list(
+        chunks.query_items(
+            query=query_to_get_a_note,
+            parameters=[{"name": "@done", "value": done_ids}],
+            enable_cross_partition_query=True,
+        )
+    )
+
     print(f"len chunks_to_do: {len(chunks_to_do)}")
 
     if len(chunks_to_do) > 0:
@@ -174,8 +167,9 @@ def main():
             process_chunk(pieces, chunk_to_do)
     else:
         print("No chunks to process.")
-        
+
     return None
+
 
 if __name__ == "__main__":
     main()
