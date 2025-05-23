@@ -1,11 +1,11 @@
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 import yaml
 from openai import AzureOpenAI, OpenAI
 from groq import Groq
 import google.generativeai as genai
 
-load_dotenv()
+# load_dotenv()
 
 
 def create_llm_client(llm_model_input: str, llm_model_dict: dict):

@@ -1,9 +1,9 @@
 import os
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from typing import Optional, Any
 
-load_dotenv(override=True)
+# load_dotenv(override=True)
 
 
 class SimpleCosmosClient:
