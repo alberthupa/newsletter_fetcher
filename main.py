@@ -4,6 +4,7 @@ import json
 import re
 import base64
 from datetime import datetime, timedelta, date as py_date
+
 try:
     from datetime import timezone
 except ImportError:
@@ -13,8 +14,9 @@ import tiktoken
 from openai import OpenAI
 from azure.cosmos import CosmosClient, exceptions
 
-#from dotenv import load_dotenv
-#load_dotenv()
+from dotenv import load_dotenv
+
+load_dotenv()
 # todo: https://chatgpt.com/c/682439e6-c8c0-800a-bded-44dcd3451deb
 
 
@@ -43,8 +45,6 @@ DATABASE_NAME = "hupi-loch"  # Replace with your database name if different
 CONTAINER_NAME = "knowledge-chunks"  # Replace with your container name
 
 
-
-
 # --- Token handling functions (Copied from upload_old_newsletters.py) ---
 def count_tokens(text: str) -> int:
     """Count the number of tokens in a text using the cl100k_base encoding."""
@@ -53,7 +53,9 @@ def count_tokens(text: str) -> int:
     return len(tokens)
 
 
-def chunk_text(text: str, max_tokens: int = 1000, overlap_tokens: int = 100) -> list[str]:
+def chunk_text(
+    text: str, max_tokens: int = 1000, overlap_tokens: int = 100
+) -> list[str]:
     """
     Chunks a given text into smaller segments with a specified maximum number of tokens
     and a specified number of overlapping tokens between consecutive chunks.
@@ -93,12 +95,11 @@ def chunk_text(text: str, max_tokens: int = 1000, overlap_tokens: int = 100) -> 
             "overlap_tokens must be less than max_tokens to ensure chunk progression."
         )
 
-
     try:
         encoding = tiktoken.get_encoding("cl100k_base")
     except Exception as e:
         print(f"Error initializing tiktoken encoder: {e}")
-        raise  
+        raise
 
     # Encode the entire text into tokens
     tokens = encoding.encode(text)
@@ -132,8 +133,9 @@ def chunk_text(text: str, max_tokens: int = 1000, overlap_tokens: int = 100) -> 
 
         # Move the starting position for the next chunk
         current_pos += step_size
-        
+
     return chunks
+
 
 def chunk_text_old(text: str, max_tokens: int = 8000) -> list:
     """
@@ -165,23 +167,26 @@ def chunk_text_old(text: str, max_tokens: int = 8000) -> list:
     return chunks
 
 
-# --- OpenAI Embeddings Client 
+# --- OpenAI Embeddings Client
 embeddings_client = None
 if os.environ["OPENAI_API_KEY"]:
     try:
+
         class OpenAIEmbeddings:
             """
             sth = OpenAIEmbeddings().get_openai_embedding("test")
             print(sth.data[0].embedding)
             """
 
-            #def set_embeddings_client(self):
+            # def set_embeddings_client(self):
             #    return OpenAI()
 
             def get_openai_embedding(self, text):
                 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-                return client.embeddings.create(input=text, model="text-embedding-3-small")
-            
+                return client.embeddings.create(
+                    input=text, model="text-embedding-3-small"
+                )
+
         embeddings_client = OpenAIEmbeddings()
 
         logging.info("OpenAIEmbeddings client initialized.")
@@ -330,7 +335,13 @@ def upload_text_chunk(
 def get_gmail_service():
     """Initializes and returns the Gmail API service."""
     logging.info("Debug: Initializing Gmail service...")
-    if not all([os.environ["GMAIL_REFRESH_TOKEN"], os.environ["GMAIL_CLIENT_ID"], os.environ["GMAIL_CLIENT_SECRET"]]):
+    if not all(
+        [
+            os.environ["GMAIL_REFRESH_TOKEN"],
+            os.environ["GMAIL_CLIENT_ID"],
+            os.environ["GMAIL_CLIENT_SECRET"],
+        ]
+    ):
         logging.error(
             "Error: Gmail API credentials (refresh token, client ID, client secret) not fully set."
         )
@@ -690,15 +701,12 @@ def get_last_newsletter_date(container_client):
         return None
 
 
-
 if __name__ == "__main__":
     print("--- Starting Newsletter Ingestion Script (Historical Processing) ---")
-    if 'timezone' in globals() and timezone is not None:
+    if "timezone" in globals() and timezone is not None:
         utc_timestamp = datetime.now(timezone.utc).isoformat()
     else:
         utc_timestamp = datetime.utcnow().isoformat() + "Z"
-
-
 
     logging.info("Python timer trigger function started at %s", utc_timestamp)
 
@@ -730,7 +738,6 @@ if __name__ == "__main__":
         last_downloaded_date = get_last_newsletter_date(container_client_instance)
         today = py_date.today()
 
-        
         if last_downloaded_date:
             # Start from the day after the last downloaded date
             start_date = last_downloaded_date + timedelta(days=1)
@@ -747,8 +754,6 @@ if __name__ == "__main__":
         end_date = today  # Ingest up to and including today
 
         logging.info(f"Ingestion date range: {start_date} to {end_date}")
-
-
 
         # Iterate through the date range and process newsletters for each day
         current_date = start_date
