@@ -4,7 +4,7 @@ import datetime
 from collections import Counter, defaultdict
 import json  # For potentially loading mock data or saving results
 
-from src.vectors.cosmos_client import SimpleCosmosClient
+from cosmos_client import SimpleCosmosClient
 
 
 COSMOS_CONNECTION_STRING = os.environ.get("COSMOS_CONNECTION_STRING")
