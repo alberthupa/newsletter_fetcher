@@ -77,4 +77,10 @@ jobs:
         GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # If using Gemini API
-      run: python structurize.py      
+      run: python structurize.py
+
+
+    - name: calculate trends
+      env:
+        COSMOS_CONNECTION_STRING: ${{ secrets.COSMOS_CONNECTION_STRING }}
+      run: python calculate_trends.py
