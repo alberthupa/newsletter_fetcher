@@ -67,3 +67,14 @@ jobs:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}    
       run: python main.py
       
+    - name: Run structurizer
+      env:
+        COSMOS_CONNECTION_STRING: ${{ secrets.COSMOS_CONNECTION_STRING }}
+        COSMOS_DATABASE_NAME: ${{ secrets.COSMOS_DB_NAME }} # Or hardcode if not sensitive
+        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }} # Or hardcode if not sensitive
+        GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+        GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+        GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # If using Gemini API
+      run: python structurize.py      
