@@ -122,7 +122,7 @@ def process_chunk(pieces_container_client, chunk_to_do):
         return False
 
 
-def main():
+def main_old():
     # Initialize Cosmos Client
 
     try:
@@ -170,6 +170,66 @@ def main():
 
     return None
 
+def main():
+    # Initialize Cosmos Client
+    try:
+        cosmos_client = SimpleCosmosClient(
+            connection_string=COSMOS_CONNECTION_STRING,
+            database_name=COSMOS_DATABASE_NAME,
+            partition_key_path=PARTITION_KEY_PATH,
+        )
+        cosmos_client.connect()
+        pieces = cosmos_client.database_client.get_container_client("knowledge-pieces")
+        chunks = cosmos_client.database_client.get_container_client("knowledge-chunks")
+    except Exception as e:
+        raise  # Critical failure, cannot proceed without DB access
+
+    # 1. Fetch a batch of candidate chunks to process, ordered by date.
+    #    This query no longer contains the huge list of IDs.
+    query_to_get_candidates = """
+        SELECT TOP 1000 *
+        FROM c
+        ORDER BY c.chunk_date
+    """
+    candidate_chunks = list(
+        chunks.query_items(
+            query=query_to_get_candidates,
+            enable_cross_partition_query=True,
+        )
+    )
+
+    print(f"Found {len(candidate_chunks)} candidate chunks to evaluate.")
+
+    if not candidate_chunks:
+        print("No chunks to process.")
+        return
+
+    processed_count = 0
+    # 2. Loop through the candidates.
+    for chunk_to_do in candidate_chunks:
+        # 3. For each chunk, run a small, fast query to see if it's already been processed.
+        check_query = "SELECT VALUE COUNT(1) FROM p WHERE p.parent_id = @parent_id"
+        query_params = [{"name": "@parent_id", "value": chunk_to_do["id"]}]
+        
+        results = list(pieces.query_items(
+            query=check_query, 
+            parameters=query_params, 
+            enable_cross_partition_query=True
+        ))
+        
+        is_processed = results and results[0] > 0
+
+        # 4. If it has not been processed, process it.
+        if not is_processed:
+            if process_chunk(pieces, chunk_to_do):
+                processed_count += 1
+        else:
+            # Optionally, log that you are skipping an already processed chunk.
+            print(f"Skipping already processed chunk: {chunk_to_do['id']}")
+
+    print(f"Successfully processed {processed_count} new chunks.")
+
+    return None
 
 if __name__ == "__main__":
     main()
