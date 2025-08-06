@@ -1,6 +1,7 @@
 import os
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
-#from dotenv import load_dotenv
+
+# from dotenv import load_dotenv
 from typing import Optional, Any
 
 # load_dotenv(override=True)
@@ -26,8 +27,10 @@ class SimpleCosmosClient:
         """
         print("Connecting to Cosmos DB...")
         print(self.database_name)
+        # print(self.connection_string)
         try:
             parts = self.connection_string.split(";")
+            print(f"Connection string parts: {parts}")
             uri = None
             key = None
             for part in parts:
@@ -37,6 +40,7 @@ class SimpleCosmosClient:
                     key_start_index = part.find("=") + 1
                     key = part[key_start_index:]
 
+            print(f"URI: {uri}")
             if not uri or not key:
                 raise ValueError("Invalid connection string format")
 

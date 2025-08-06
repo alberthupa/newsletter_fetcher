@@ -146,7 +146,7 @@ def main_old():
     )
 
     query_to_get_a_note = """
-        SELECT TOP 1000 *
+        SELECT *
         FROM c
         WHERE NOT ARRAY_CONTAINS(@done, c.id)
         ORDER BY c.chunk_date  
@@ -170,6 +170,7 @@ def main_old():
 
     return None
 
+
 def main():
     # Initialize Cosmos Client
     try:
@@ -187,7 +188,7 @@ def main():
     # 1. Fetch a batch of candidate chunks to process, ordered by date.
     #    This query no longer contains the huge list of IDs.
     query_to_get_candidates = """
-        SELECT TOP 1000 *
+        SELECT *
         FROM c
         ORDER BY c.chunk_date
     """
@@ -210,13 +211,15 @@ def main():
         # 3. For each chunk, run a small, fast query to see if it's already been processed.
         check_query = "SELECT VALUE COUNT(1) FROM p WHERE p.parent_id = @parent_id"
         query_params = [{"name": "@parent_id", "value": chunk_to_do["id"]}]
-        
-        results = list(pieces.query_items(
-            query=check_query, 
-            parameters=query_params, 
-            enable_cross_partition_query=True
-        ))
-        
+
+        results = list(
+            pieces.query_items(
+                query=check_query,
+                parameters=query_params,
+                enable_cross_partition_query=True,
+            )
+        )
+
         is_processed = results and results[0] > 0
 
         # 4. If it has not been processed, process it.
@@ -230,6 +233,7 @@ def main():
     print(f"Successfully processed {processed_count} new chunks.")
 
     return None
+
 
 if __name__ == "__main__":
     main()
