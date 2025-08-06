@@ -146,7 +146,7 @@ def main_old():
     )
 
     query_to_get_a_note = """
-        SELECT TOP 1000 *
+        SELECT *
         FROM c
         WHERE NOT ARRAY_CONTAINS(@done, c.id)
         ORDER BY c.chunk_date  

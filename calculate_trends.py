@@ -6,6 +6,10 @@ import json  # For potentially loading mock data or saving results
 
 from cosmos_client import SimpleCosmosClient
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(override=True)
 
 COSMOS_CONNECTION_STRING = os.environ.get("COSMOS_CONNECTION_STRING")
 DATABASE_NAME = "hupi-loch"
