@@ -21,7 +21,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.x' # Use the latest Python 3 version
+        python-version: '3.13' # Pin to 3.13 for tiktoken compatibility
 
     - name: Install dependencies
       run: |
